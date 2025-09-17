@@ -1,0 +1,32 @@
+<!doctype html>
+<head>
+  <style>
+    html, body { height:100%; margin:0; background:#111; color:#eee; font-family:system-ui, sans-serif; }
+    #gl-canvas { display:block; width:min(92vw, 720px); height:min(92vw, 720px); margin:24px auto; background:#000; border-radius:12px; }
+  </style>
+</head>
+<body>
+  <canvas id="gl-canvas" width="720" height="720"></canvas>
+
+  <!-- vertex shader: I had trouble figuring out how to import WebGL2 and 
+   its shaders so I used ChatGPT to help properly import and setup vertex shaders -->
+  <script id="vshader" type="x-shader/x-vertex">#version 300 es
+  in vec2 a_position;
+  void main() {
+    gl_Position = vec4(a_position, 0, 1);
+  }
+  </script>
+
+  <!-- fragment shader: I had trouble figuring out how to import WebGL2 and 
+   its shaders so I used ChatGPT to help properly import and setup fragment shaders -->
+  <script id="fshader" type="x-shader/x-fragment">#version 300 es
+  precision mediump float;
+  out vec4 outColor;
+  void main() {
+    outColor = vec4(0, 0, 0, 1);
+  }
+  </script>
+
+  <script src="main.js"></script>
+</body>
+</html>

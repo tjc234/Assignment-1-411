@@ -2,33 +2,37 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" >
-<title>2D Sierpinski Gasket</title>
+<title>3D Sierpinski Gasket</title>
 
 <script id="vertex-shader" type="x-shader/x-vertex">
-attribute vec4 vPosition;
+attribute vec3 vPosition;
+attribute vec3 vColor;
+varying vec3 fColor;
+uniform mat4 uModelViewProj;
 
 void
 main()
 {
-    gl_Position = vPosition;
+    fColor = vColor;
+    gl_Position = uModelViewProj * vec4( vPosition, 1.0 );
 }
 </script>
-
 <script id="fragment-shader" type="x-shader/x-fragment">
 precision mediump float;
+varying vec3 fColor;
 
 void
 main()
 {
-    gl_FragColor = vec4( 0.0, 0.0, 0.0, 1.0 );
+    gl_FragColor = vec4( fColor, 1.0 );
 }
 </script>
 
 <script type="text/javascript" src="Common/webgl-utils.js"></script>
 <script type="text/javascript" src="Common/initShaders.js"></script>
 <script type="text/javascript" src="Common/MV.js"></script>
-<script type="text/javascript" src="gasket2.js"></script>
-</head>
+<script type="text/javascript" src="gasket3.js"></script>
+</head>   
 
 <body>
 <canvas id="gl-canvas" width="512" height="512">

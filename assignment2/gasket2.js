@@ -15,21 +15,6 @@ window.onload = function init()
     if ( !gl ) { alert( "WebGL isn't available" ); }
 
     //
-    //  Initialize our data for the Sierpinski Gasket
-    //
-
-    // First, initialize the corners of our gasket with three points.
-
-    var vertices = [
-        vec2( -1, -1 ),
-        vec2(  0,  1 ),
-        vec2(  1, -1 )
-    ];
-
-    divideTriangle( vertices[0], vertices[1], vertices[2],
-                    NumTimesToSubdivide);
-
-    //
     //  Configure WebGL
     //
     gl.viewport( 0, 0, canvas.width, canvas.height );
@@ -40,14 +25,21 @@ window.onload = function init()
     var program = initShaders( gl, "vertex-shader", "fragment-shader" );
     gl.useProgram( program );
 
-    // Load the data into the GPU
+    // Three 2D vertices of the initial triangle
+    var vertices = [
+        vec2( -1.0, -1.0 ),
+        vec2(  0.0,  1.0 ),
+        vec2(  1.0, -1.0 )
+    ];
 
+    divideTriangle( vertices[0], vertices[1], vertices[2], NumTimesToSubdivide );
+
+    // Load the data into the GPU
     var bufferId = gl.createBuffer();
     gl.bindBuffer( gl.ARRAY_BUFFER, bufferId );
-    gl.bufferData( gl.ARRAY_BUFFER, flatten(points), gl.STATIC_DRAW );
+    gl.bufferData( gl.ARRAY_BUFFER, flatten( points ), gl.STATIC_DRAW );
 
     // Associate out shader variables with our data buffer
-
     var vPosition = gl.getAttribLocation( program, "vPosition" );
     gl.vertexAttribPointer( vPosition, 2, gl.FLOAT, false, 0, 0 );
     gl.enableVertexAttribArray( vPosition );
@@ -60,18 +52,13 @@ function triangle( a, b, c )
     points.push( a, b, c );
 }
 
+// Subdivide into 3 triangles (remove center)
 function divideTriangle( a, b, c, count )
 {
-
-    // check for end of recursion
-
     if ( count === 0 ) {
         triangle( a, b, c );
     }
     else {
-
-        //bisect the sides
-
         var ab = mix( a, b, 0.5 );
         var ac = mix( a, c, 0.5 );
         var bc = mix( b, c, 0.5 );
@@ -79,7 +66,6 @@ function divideTriangle( a, b, c, count )
         --count;
 
         // three new triangles
-
         divideTriangle( a, ab, ac, count );
         divideTriangle( c, ac, bc, count );
         divideTriangle( b, bc, ab, count );

@@ -20,6 +20,8 @@ window.onload = function init()
     //
     gl.viewport( 0, 0, canvas.width, canvas.height );
     gl.clearColor( 1.0, 1.0, 1.0, 1.0 );
+
+    // Enable depth testing
     gl.enable( gl.DEPTH_TEST );
     gl.depthFunc( gl.LEQUAL );
     gl.clearDepth( 1.0 );
@@ -57,29 +59,36 @@ window.onload = function init()
     // Build geometry
     rebuild();
 
+    // Draw the scene
     function rebuild()
     {
         points = [];
         colors = [];
 
+        // Start the recursive division
         divideTetra( va, vb, vc, vd, NumTimesToSubdivide );
 
+        // Load the data into the GPU
         gl.bindBuffer( gl.ARRAY_BUFFER, vBuffer );
         gl.bufferData( gl.ARRAY_BUFFER, flatten( points ), gl.STATIC_DRAW );
 
+        // Load the color data into the GPU
         gl.bindBuffer( gl.ARRAY_BUFFER, cBuffer );
         gl.bufferData( gl.ARRAY_BUFFER, flatten( colors ), gl.STATIC_DRAW );
 
+        // Render the new image
         render();
     }
 
     function triangle( a, b, c, color )
     {
         points.push( a, b, c );
+
+        // same color for each vertex
         colors.push( color, color, color );
     }
 
-    // Emit a solid tetrahedron with 4 differently colored faces
+    // Draw a tetrahedron by drawing four triangles
     function tetra( a, b, c, d )
     {
         var face0 = vec3( 0.95, 0.25, 0.25 ); // red
@@ -94,7 +103,7 @@ window.onload = function init()
         triangle( b, c, d, face3 );
     }
 
-    // Volume subdivision into 4 tetrahedra via edge midpoints
+    // Subdivide tetrahedron into 4 tetrahedra
     function divideTetra( a, b, c, d, count )
     {
         if ( count === 0 ) {
@@ -109,8 +118,10 @@ window.onload = function init()
         var bd = mix( b, d, 0.5 );
         var cd = mix( c, d, 0.5 );
 
+        // Decrement subdivision count
         --count;
 
+        // Recurse
         divideTetra( a,  ab, ac, ad, count );
         divideTetra( ab, b,  bc, bd, count );
         divideTetra( ac, bc, c,  cd, count );
@@ -119,11 +130,11 @@ window.onload = function init()
 
     function computeMVP()
     {
-        // Position the camera just above the apex so the tip dominates the frame
+        // Set the camera to be positioned facing the origin
         var eye = vec3( 0.0, 0.0, 2.4 );
         var at  = vec3( 0.0, 0.0, 1.0 );
         var up  = vec3( 0.0, 1.0, 0.0 );
-
+        
         var view = lookAt( eye, at, up );
         var model = mult( rotateX( -18.0 ), rotateZ( 20.0 ) );
         var mv = mult( view, model );
@@ -134,11 +145,19 @@ window.onload = function init()
         return mult( proj, mv );
     }
 
+    // Render the scene
     function render()
     {
+        // Clear the canvas
         gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT );
+
+        // Draw the tetrahedron
         var mvp = computeMVP();
+
+        // Send the MVP matrix to the shader
         gl.uniformMatrix4fv( uMVP, false, flatten( mvp ) );
+
+        // Draw the points
         gl.drawArrays( gl.TRIANGLES, 0, points.length );
     }
 }
